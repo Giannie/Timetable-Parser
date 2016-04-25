@@ -3,11 +3,40 @@ import xml.etree.ElementTree as et
 
 xml_file = "/Volumes/Home Drive/Users/giancarlo/Downloads/PAD.xml"
 
+days = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+weeks = ["A", "B"]
+
+day_list = []
+
+for week in weeks:
+    for day in days:
+        day_list.append(day + week)
+
 def LessonDict(group="", room=""):
     return {"group": group, "room": room}
 
 def PeriodDict(title, start, end):
         self = {"title": title, "start": start, "end": end}
+
+class TimeTableClass(list):
+    def __init__(self, xml_file):
+        super(TimeTableClass, self).__init__()
+        tree = et.parse(xml_file)
+        root = tree.getroot()
+
+        for item in root[0][1][0][4:16]:
+            row = []
+            for lesson_xml in item[1:]:
+                if len(lesson_xml) > 1:
+                    lesson = LessonDict(group=lesson_xml[0].text, room=lesson_xml[1].text)
+                else:
+                    lesson = LessonDict()
+                row.append(lesson)
+            self.append(row)
+    def column(self, number):
+        c = [self[i][0] for i in range(len(self))]
+        return c
+
 
 day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
               PeriodDict("S1", time(8, 45), time(9, 35)),
@@ -21,23 +50,3 @@ day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
               PeriodDict("S5", time(14, 15), time(15, 5)),
               PeriodDict("S6", time(15, 10), time(16, 0)),
               PeriodDict("SED", time(16, 10), time(17, 0))]
-
-
-def TimeTableClass(xml_file):
-    tree = et.parse(xml_file)
-    root = tree.getroot()
-
-    timetable_list = []
-
-    for item in root[0][1][0][4:16]:
-        row = []
-        for lesson_xml in item[1:]:
-            print(len(lesson_xml))
-            if len(lesson_xml) > 1:
-                print(lesson_xml[0].text)
-                lesson = LessonDict(group=lesson_xml[0].text, room=lesson_xml[1].text)
-            else:
-                lesson = LessonDict()
-            row.append(lesson)
-        timetable_list.append(row)
-    return timetable_list
