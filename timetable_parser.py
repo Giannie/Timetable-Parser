@@ -1,5 +1,6 @@
-from datetime import time, datetime
+from datetime import time, datetime, timedelta
 import xml.etree.ElementTree as et
+import icalendar
 
 xml_file = "/path/to/file.xml"
 
@@ -12,7 +13,7 @@ for week in weeks:
     for day in days:
         day_list.append(day + week)
 
-def LessonDict(group="", room=""):
+def LessonDict(group="", room="", period=None):
     return {"group": group, "room": room}
 
 def PeriodDict(title, start, end):
@@ -24,7 +25,7 @@ class TimeTableClass(list):
         tree = et.parse(xml_file)
         root = tree.getroot()
         
-        day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
+        self.day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
               PeriodDict("S1", time(8, 45), time(9, 35)),
               PeriodDict("S2", time(9, 40), time(10, 30)),
               PeriodDict("SB1", time(10, 30), time(10, 50)),
@@ -37,15 +38,35 @@ class TimeTableClass(list):
               PeriodDict("S6", time(15, 10), time(16, 0)),
               PeriodDict("SED", time(16, 10), time(17, 0))]
         
+        period_count = 0
+        
         for item in root[0][1][0][4:16]:
             row = []
             for lesson_xml in item[1:]:
                 if len(lesson_xml) > 1:
-                    lesson = LessonDict(group=lesson_xml[0].text, room=lesson_xml[1].text)
+                    lesson = LessonDict(group=lesson_xml[0].text, room=lesson_xml[1].text, period=self.day_struct[period_count])
                 else:
                     lesson = LessonDict()
                 row.append(lesson)
             self.append(row)
+            period_count += 1
     def column(self, number):
         c = [self[i][0] for i in range(len(self))]
         return c
+    
+    def gen_calendar(self, term_start, half_start, half_end, term_end):
+        cal = icalendar.Calendar()
+        cal.add('prodid', '-//Timetable Calendar//')
+        cal.add('version', '2.0')
+        return cal
+    
+    def gen_ical_event(self, lesson, start_date, end_date):
+        event = icalendar.Event()
+        event.add('summary', lesson['group'])
+        start_date.replace(hour=lesson['period']['start'].hour, minute=lesson['period']['start'].minute)
+        event.add('dtstart', start_date)
+        start_date.replace(hour=lesson['period']['end'].hour, minute=lesson['period']['end'].minute)
+        event.add('dtend', start_date)
+        event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date)
+        return event
+        
