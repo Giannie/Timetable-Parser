@@ -1,6 +1,7 @@
 from datetime import time, datetime, timedelta
 import xml.etree.ElementTree as et
 import icalendar
+import math
 
 xml_file = "/path/to/file.xml"
 
@@ -68,9 +69,16 @@ class TimeTableClass(list):
                 start_date += timedelta(days=3)
             else:
                 start_date += timedelta(days=1)
+        half_length = half_end - term_start
+        if math.ceil(half_length.days) % 2:
+            b_start = False
+        else:
+            b_start = True
         end_date = term_end
         for row in self:
             start_date = half_start
+            if b_start:
+                row = row[5:] + row[0:5]
             for lesson in row:
                 if lesson["group"]:
                     cal.add_component(self.gen_ical_event(lesson, start_date, end_date))
