@@ -14,7 +14,7 @@ for week in weeks:
         day_list.append(day + week)
 
 def LessonDict(group="", room="", period=None):
-    return {"group": group, "room": room}
+    return {"group": group, "room": room, "period": period}
 
 def PeriodDict(title, start, end):
     return {"title": title, "start": start, "end": end}
@@ -24,7 +24,7 @@ class TimeTableClass(list):
         super(TimeTableClass, self).__init__()
         tree = et.parse(xml_file)
         root = tree.getroot()
-        
+
         self.day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
               PeriodDict("S1", time(8, 45), time(9, 35)),
               PeriodDict("S2", time(9, 40), time(10, 30)),
@@ -37,9 +37,9 @@ class TimeTableClass(list):
               PeriodDict("S5", time(14, 15), time(15, 5)),
               PeriodDict("S6", time(15, 10), time(16, 0)),
               PeriodDict("SED", time(16, 10), time(17, 0))]
-        
+
         period_count = 0
-        
+
         for item in root[0][1][0][4:16]:
             row = []
             for lesson_xml in item[1:]:
@@ -53,20 +53,40 @@ class TimeTableClass(list):
     def column(self, number):
         c = [self[i][0] for i in range(len(self))]
         return c
-    
-    def gen_calendar(self, term_start, half_start, half_end, term_end):
+
+    def gen_calendar(self, term_start, half_end, half_start, term_end):
         cal = icalendar.Calendar()
         cal.add('prodid', '-//Timetable Calendar//')
         cal.add('version', '2.0')
+        end_date = half_end
+        for row in self:
+            start_date = term_start
+            for lesson in row:
+                if lesson["group"]:
+                    cal.add_component(self.gen_ical_event(lesson, start_date, end_date))
+            if start_date.isoweekday() == 5:
+                start_date += timedelta(days=3)
+            else:
+                start_date += timedelta(days=1)
+        end_date = term_end
+        for row in self:
+            start_date = half_start
+            for lesson in row:
+                if lesson["group"]:
+                    cal.add_component(self.gen_ical_event(lesson, start_date, end_date))
+            if start_date.isoweekday() == 5:
+                start_date += timedelta(days=3)
+            else:
+                start_date += timedelta(days=1)
         return cal
-    
+
     def gen_ical_event(self, lesson, start_date, end_date):
         event = icalendar.Event()
         event.add('summary', lesson['group'])
-        start_date.replace(hour=lesson['period']['start'].hour, minute=lesson['period']['start'].minute)
+        start_date = start_date.replace(hour=lesson['period']['start'].hour, minute=lesson['period']['start'].minute)
         event.add('dtstart', start_date)
-        start_date.replace(hour=lesson['period']['end'].hour, minute=lesson['period']['end'].minute)
+        start_date = start_date.replace(hour=lesson['period']['end'].hour, minute=lesson['period']['end'].minute)
         event.add('dtend', start_date)
-        event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date)
+        event['location'] = icalendar.vText(lesson["room"])
+        event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date})
         return event
-        
