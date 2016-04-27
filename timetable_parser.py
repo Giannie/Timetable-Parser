@@ -14,8 +14,8 @@ for week in weeks:
     for day in days:
         day_list.append(day + week)
 
-def LessonDict(group="", room="", period=None):
-    return {"group": group, "room": room, "period": period}
+def LessonDict(group="", room="", period=None, type=""):
+    return {"group": group, "room": room, "period": period, "type": type}
 
 def PeriodDict(title, start, end):
     return {"title": title, "start": start, "end": end}
@@ -45,7 +45,7 @@ class TimeTableClass(list):
             row = []
             for lesson_xml in item[1:]:
                 if len(lesson_xml) > 1:
-                    lesson = LessonDict(group=lesson_xml[0].text, room=lesson_xml[1].text, period=self.day_struct[period_count])
+                    lesson = LessonDict(group=lesson_xml[0].text, room=lesson_xml[1].text.split()[0], period=self.day_struct[period_count], type=lesson_xml[1].text.split()[1])
                 else:
                     lesson = LessonDict()
                 row.append(lesson)
@@ -97,6 +97,7 @@ class TimeTableClass(list):
         event.add('dtend', start_date)
         event['location'] = icalendar.vText(lesson["room"])
         event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date})
+        event.add('categories', lesson['type'])
         return event
 
     def write_calendar(self, filepath, term_start, half_end, half_start, term_end):
