@@ -14,8 +14,8 @@ for week in weeks:
     for day in days:
         day_list.append(day + week)
 
-def LessonDict(group="", room="", period=None, type=""):
-    return {"group": group, "room": room, "period": period, "type": type}
+def LessonDict(group="", room="", period=None, cat=""):
+    return {"group": group, "room": room, "period": period, "type": cat}
 
 def PeriodDict(title, start, end):
     return {"title": title, "start": start, "end": end}
@@ -44,8 +44,15 @@ class TimeTableClass(list):
         for item in root[0][1][0][4:16]:
             row = []
             for lesson_xml in item[1:]:
+                room_info = lesson_xml[1].text.split()
+                if len(room_info) > 1:
+                    room = room_info[0]
+                    cat = room_info[1]
+                else:
+                    room = ''
+                    cat = ''
                 if len(lesson_xml) > 1:
-                    lesson = LessonDict(group=lesson_xml[0].text, room=lesson_xml[1].text.split()[0], period=self.day_struct[period_count], type=lesson_xml[1].text.split()[1])
+                    lesson = LessonDict(group=lesson_xml[0].text, room=room, period=self.day_struct[period_count], cat=cat)
                 else:
                     lesson = LessonDict()
                 row.append(lesson)
