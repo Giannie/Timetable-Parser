@@ -128,7 +128,7 @@ class TimeTableGroup(dict):
             timetable = TimeTableClass(xml_tag)
             name = re.sub('Timetable[ -]*', '', xml_tag[1].text)
             self[name] = timetable
-    
+
     def generate_calendars(self, term_start, half_end, half_start, term_end, path=''):
         for name, timetable in self.items():
             name = re.sub('[\\/:"*?<>|()]+','',name)
