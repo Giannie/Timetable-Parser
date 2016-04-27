@@ -16,3 +16,9 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
 
     def selectTarget(self):
         self.target_line_edit.setText(QtGui.QFileDialog)
+
+if __name__ == "__main__":
+    app = QtGui.QApplication(sys.argv)
+    form = TimetableApp()
+    form.show()
+    app.exec_()
