@@ -55,6 +55,9 @@ class TimeTableClass(list):
                         else:
                             room = ''
                             cat = ''
+                    else:
+                        room = ''
+                        cat = ''
                     lesson = LessonDict(group=lesson_xml[0].text, room=room, period=self.day_struct[period_count], cat=cat)
                 else:
                     lesson = LessonDict()
