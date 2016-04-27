@@ -2,6 +2,7 @@ from datetime import time, datetime, timedelta
 import xml.etree.ElementTree as et
 import icalendar
 import math
+import os
 
 xml_file = "/path/to/file.xml"
 
@@ -21,10 +22,8 @@ def PeriodDict(title, start, end):
     return {"title": title, "start": start, "end": end}
 
 class TimeTableClass(list):
-    def __init__(self, xml_file):
+    def __init__(self, xml_tag):
         super(TimeTableClass, self).__init__()
-        tree = et.parse(xml_file)
-        root = tree.getroot()
 
         self.day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
               PeriodDict("S1", time(8, 45), time(9, 35)),
@@ -41,7 +40,7 @@ class TimeTableClass(list):
 
         period_count = 0
 
-        for item in root[0][1][0][4:16]:
+        for item in xml_tag[4:16]:
             row = []
             for lesson_xml in item[1:]:
                 if len(lesson_xml) > 1 and lesson_xml[0].text != 'Blanking Code':
@@ -113,3 +112,18 @@ class TimeTableClass(list):
     def write_calendar(self, filepath, term_start, half_end, half_start, term_end):
         with open(filepath, 'wb') as f:
             f.write(self.gen_calendar(term_start, half_end, half_start, term_end).to_ical())
+
+class TimeTableGroup(dict):
+    def __init__(self, xml_file):
+        super(TimeTableGroup, self).__init__()
+        tree = et.parse(xml_file)
+        root = tree.getroot()
+        timetables_tag = root[0][1]
+        for xml_tag in timetables_tag:
+            timetable = TimeTableClass(xml_tag)
+            name = xml_tag[1].text
+            self[name] = timetable
+    
+    def generate_calendars(self, term_start, half_end, half_start, term_end, path=''):
+        for name, timetable in self.iteritems():
+            timetable.write_calendar(os.path.join(path, name + '.ics'), term_start, half_end, half_start, term_end)
