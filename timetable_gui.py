@@ -9,3 +9,10 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
         self.setupUi(self)
         for date_edit in self.findChildren(QtGui.QDateEdit):
             date_edit.setDate(QtCore.QDate.currentDate())
+        self.xml_choice_button.clicked.connect(self.selectXMLFile)
+
+    def selectXMLFile(self):
+        self.xml_line_edit.setText(QtGui.QFileDialog)
+
+    def selectTarget(self):
+        self.target_line_edit.setText(QtGui.QFileDialog)
