@@ -111,7 +111,7 @@ class TimeTableClass(list):
         event.add('dtend', start_date)
         event['location'] = icalendar.vText(lesson["room"])
         event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date})
-        event.add('categories', [lesson['type'], lesson['group'])
+        event.add('categories', [lesson['type'], lesson['group']])
         return event
 
     def write_calendar(self, filepath, term_start, half_end, half_start, term_end):
