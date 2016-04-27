@@ -10,12 +10,13 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
         for date_edit in self.findChildren(QtGui.QDateEdit):
             date_edit.setDate(QtCore.QDate.currentDate())
         self.xml_choice_button.clicked.connect(self.selectXMLFile)
+        self.target_choice_button.clicked.connect(self.selectTarget)
 
     def selectXMLFile(self):
-        self.xml_line_edit.setText(QtGui.QFileDialog)
+        self.xml_line_edit.setText(QtGui.QFileDialog.getOpenFileName())
 
     def selectTarget(self):
-        self.target_line_edit.setText(QtGui.QFileDialog)
+        self.target_line_edit.setText(QtGui.QFileDialog.getExistingDirectory())
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
