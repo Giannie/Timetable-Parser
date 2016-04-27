@@ -65,27 +65,27 @@ class TimeTableClass(list):
             for lesson in row:
                 if lesson["group"]:
                     cal.add_component(self.gen_ical_event(lesson, start_date, end_date))
-            if start_date.isoweekday() == 5:
-                start_date += timedelta(days=3)
-            else:
-                start_date += timedelta(days=1)
+                if start_date.isoweekday() == 5:
+                    start_date += timedelta(days=3)
+                else:
+                    start_date += timedelta(days=1)
         half_length = half_end - term_start
-        if math.ceil(half_length.days) % 2:
-            b_start = False
-        else:
+        if math.ceil(half_length.days / 7) % 2:
             b_start = True
+        else:
+            b_start = False
         end_date = term_end
         for row in self:
             start_date = half_start
             if b_start:
-                row = row[5:] + row[0:5]
+                row = row[5:] + row[:5]
             for lesson in row:
                 if lesson["group"]:
                     cal.add_component(self.gen_ical_event(lesson, start_date, end_date))
-            if start_date.isoweekday() == 5:
-                start_date += timedelta(days=3)
-            else:
-                start_date += timedelta(days=1)
+                if start_date.isoweekday() == 5:
+                    start_date += timedelta(days=3)
+                else:
+                    start_date += timedelta(days=1)
         return cal
 
     def gen_ical_event(self, lesson, start_date, end_date):
@@ -98,3 +98,7 @@ class TimeTableClass(list):
         event['location'] = icalendar.vText(lesson["room"])
         event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date})
         return event
+
+    def write_calendar(self, filepath, term_start, half_end, half_start, term_end):
+        with open(filepath, 'wb') as f:
+            f.write(self.gen_calendar(term_start, half_end, half_start, term_end).to_ical())
