@@ -3,6 +3,7 @@ import xml.etree.ElementTree as et
 import icalendar
 import math
 import os
+import re
 
 xml_file = "/path/to/file.xml"
 
@@ -130,4 +131,5 @@ class TimeTableGroup(dict):
     
     def generate_calendars(self, term_start, half_end, half_start, term_end, path=''):
         for name, timetable in self.items():
+            name = re.sub('[\\/:"*?<>|]+','',name)
             timetable.write_calendar(os.path.join(path, name + '.ics'), term_start, half_end, half_start, term_end)
