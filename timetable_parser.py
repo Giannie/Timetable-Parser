@@ -121,7 +121,7 @@ class TimeTableGroup(dict):
         timetables_tag = root[0][1]
         for xml_tag in timetables_tag:
             timetable = TimeTableClass(xml_tag)
-            name = xml_tag[1].text
+            name = xml_tag[1].text.strip('Timetable - ')
             self[name] = timetable
     
     def generate_calendars(self, term_start, half_end, half_start, term_end, path=''):
