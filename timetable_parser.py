@@ -5,7 +5,6 @@ import math
 import os
 import re
 
-xml_file = "/path/to/file.xml"
 
 days = ["Mon", "Tue", "Wed", "Thu", "Fri"]
 weeks = ["A", "B"]
