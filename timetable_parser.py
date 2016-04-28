@@ -64,6 +64,7 @@ class TimeTableClass(list):
                 row.append(lesson)
             self.append(row)
             period_count += 1
+
     def column(self, number):
         c = [self[i][0] for i in range(len(self))]
         return c

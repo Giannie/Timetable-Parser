@@ -16,6 +16,7 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
             date_edit.dateChanged.connect(self.lambdaGen(index))
             if index > 0:
                 date_edit.setMinimumDate(QtCore.QDate.currentDate())
+        
         self.xml_choice_button.clicked.connect(self.selectXMLFile)
         self.target_choice_button.clicked.connect(self.selectTarget)
         self.genCalButton.clicked.connect(self.generateCalendars)
