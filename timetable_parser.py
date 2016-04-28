@@ -13,9 +13,9 @@ day_list = []
 
 for week in weeks:
     for day in days:
-        day_list.append(day + week)
+        day_list.append(week + day)
 
-def LessonDict(group="", room="", period=None, cat=""):
+def LessonDict(group="", room="", period=None, cat="", start="", end=""):
     return {"group": group, "room": room, "period": period, "type": cat}
 
 def PeriodDict(title, start, end):
@@ -25,6 +25,10 @@ class TimeTableClass(list):
     def __init__(self, xml_tag):
         super(TimeTableClass, self).__init__()
 
+        self.day_dict = {}
+        for day in day_list:
+            self.day_dict[day] = []
+        
         self.day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
               PeriodDict("S1", time(8, 45), time(9, 35)),
               PeriodDict("S2", time(9, 40), time(10, 30)),
