@@ -109,7 +109,7 @@ class TimeTableClass(list):
         start_date = start_date.replace(hour=lesson['period']['end'].hour, minute=lesson['period']['end'].minute)
         event.add('dtend', start_date)
         event['location'] = icalendar.vText(lesson["room"])
-        event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date})
+        event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': end_date + timedelta(days=1)})
         event.add('categories', [lesson['type'], lesson['group']])
         return event
 
