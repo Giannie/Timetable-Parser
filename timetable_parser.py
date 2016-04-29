@@ -44,13 +44,12 @@ class TimeTableClass(list):
             row = []
             for lesson_xml in item[1:]:
                 if len(lesson_xml) > 1 and lesson_xml[0].text != 'Blanking Code':
-                    if lesson_xml[1]:
+                    if lesson_xml[1].text:
                         room_info = lesson_xml[1].text.split()
                         if len(room_info) > 1:
-                            if room_info[0] == 'ICT':
-                                room = room_info[0] + room_info[1]
-                            else:
-                                room = room_info[0]
+                            room = ''
+                            for s in room_info[:-1]:
+                                room += s
                             cat = room_info[-1]
                         else:
                             room = ''
