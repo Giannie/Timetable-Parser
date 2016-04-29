@@ -13,7 +13,7 @@ day_list = []
 
 for week in weeks:
     for day in days:
-        day_list.append(day + week)
+        day_list.append(week + day)
 
 def LessonDict(group="", room="", period=None, cat=""):
     return {"group": group, "room": room, "period": period, "type": cat}
@@ -132,3 +132,17 @@ class TimeTableGroup(dict):
         for name, timetable in self.items():
             name = re.sub('[\\/:"*?<>|()]+','',name)
             timetable.write_calendar(os.path.join(path, name + '.ics'), term_start, half_end, half_start, term_end)
+
+class timetableDate(dict):
+    def __init__(self, term_start=None, half_end=None, half_start=None, term_end=None, xml_date_file=None):
+        if xml_date_file:
+            # Fill in code parsing for xml file containing term dates here
+            pass
+        elif len([v for v in locals().values() if v is None]) > 1:
+            raise TypeError('Must supply term dates or an xml file containing them')
+        for i in range(len(day_list)):
+            if i <= 4:
+                offset = i
+            else:
+                offset = i + 2
+            self[day] = [term_start + timedelta(days=offset), half_start + timedelta(days=offset)]
