@@ -119,8 +119,9 @@ class TimeTableClass(list):
             f.write(self.gen_calendar(term_start, half_end, half_start, term_end).to_ical())
 
 class TimeTableGroup(dict):
-    def __init__(self, xml_file):
+    def __init__(self, xml_file, dates):
         super(TimeTableGroup, self).__init__()
+        self.dates = dates
         tree = et.parse(xml_file)
         root = tree.getroot()
         timetablesData = root[0].find("TimeTables")
@@ -129,7 +130,6 @@ class TimeTableGroup(dict):
             self[teacher_name] = []
             row_count = 0
             for row in timetable.findall("TableRow"):
-                print(row_count)
                 period_start, period_end = day_struct[row_count]
                 column_count = 0
                 for column in row.findall("CellData")[1:]:
@@ -146,20 +146,44 @@ class TimeTableGroup(dict):
                         else:
                             room = ''
                             subject = ''
-                        self[teacher_name].append({"day": day, "start": period_start, "end": period_end, "group": group, "room": room, "subject": subject})
+                        lesson_dict = {"day": day, "start": period_start, "end": period_end, "group": group, "room": room, "subject": subject}
+                        for event in self.generate_event(lesson_dict, dates):
+                            self[teacher_name].append(event)
                     column_count += 1
                 row_count += 1
                 if row_count > 11:
                     break
 
     def generate_event(self, lesson, dates):
-        event = icalendar.Event()
+        events = []
+        for i in range(2):
+            event = icalendar.Event()
+            start_date = dates[lesson["day"]][i]
+            start_date = start_date.replace(minute=lesson["start"].minute, hour=lesson["start"].hour)
+            end_date = start_date.replace(minute=lesson["end"].minute, hour=lesson["end"].hour)
+            if i == 0:
+                until = dates["half_end"]
+            else:
+                until = dates["term_end"]
+            event.add('summary', lesson['group'])
+            event.add('location', lesson['room'])
+            event.add('dtstart', start_date)
+            event.add('dtend', end_date)
+            event.add('rrule', {'freq': 'weekly', 'interval': 2, 'until': until})
+            event.add('categories', [lesson['subject'], lesson['group'], "auto-generated"])
+            events.append(event)
+        return events
 
-
-    def generate_calendars(self, term_start, half_end, half_start, term_end, path=''):
-        for name, timetable in self.items():
+    def generate_calendars(self, path):
+        for name in self.keys():
+            cal = icalendar.Calendar()
+            cal.add('prodid', '-//Timetable Calendar//')
+            cal.add('version', '2.0')
+            for event in self[name]:
+                cal.add_component(event)
             name = re.sub('[\\/:"*?<>|()]+','',name)
-            timetable.write_calendar(os.path.join(path, name + '.ics'), term_start, half_end, half_start, term_end)
+            with open(os.path.join(path, name + '.ics'), 'wb') as f:
+                f.write(cal.to_ical())
 
 class timetableDates(dict):
     def __init__(self, term_start=None, half_start=None, half_end=None, term_end=None, xml_date_file=None):
