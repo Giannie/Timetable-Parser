@@ -5,6 +5,7 @@ import sys
 import datetime
 import threading
 import os
+import configparser
 
 class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -22,6 +23,7 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
         self.xml_choice_button.clicked.connect(self.selectXMLFile)
         self.target_choice_button.clicked.connect(self.selectTarget)
         self.genCalButton.clicked.connect(self.generateCalendars)
+        self.dateFileButton.clicked.connect(self.selectDateFile)
         self.quitButton.clicked.connect(self.close)
         self.first_run = True
 
@@ -37,6 +39,23 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
 
     def selectTarget(self):
         self.target_line_edit.setText(QtGui.QFileDialog.getExistingDirectory())
+
+    def selectDateFile(self):
+        self.selectDates(QtGui.QFileDialog.getOpenFileName())
+
+    def selectDates(self, filename):
+        if filename:
+            config = configparser.ConfigParser()
+            config.read(filename)
+            choices = config.sections()
+            term, ok = QtGui.QInputDialog.getItem(self, "Select Term", "Select term: ", choices, 0, False)
+            if ok:
+                term_choice = config[term]
+                self.term_start_edit.setDate(QtCore.QDate.fromString(term_choice["term_start"], "dd'/'MM'/'yyyy"))
+                self.half_end_edit.setDate(QtCore.QDate.fromString(term_choice["half_end"], "dd'/'MM'/'yyyy"))
+                self.half_start_edit.setDate(QtCore.QDate.fromString(term_choice["half_start"], "dd'/'MM'/'yyyy"))
+                self.term_end_edit.setDate(QtCore.QDate.fromString(term_choice["term_end"], "dd'/'MM'/'yyyy"))
+
 
     def generateCalendars(self):
         target = self.target_line_edit.text()
