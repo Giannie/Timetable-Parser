@@ -23,7 +23,7 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
         self.target_choice_button.clicked.connect(self.selectTarget)
         self.genCalButton.clicked.connect(self.generateCalendars)
         self.quitButton.clicked.connect(self.close)
-        self.calThread = None
+        self.first_run = True
 
     def updateDates(self, index=0):
         if index < 3:
@@ -44,39 +44,38 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
         half_end = datetime.datetime.combine(self.half_end_edit.date().toPyDate(), datetime.time())
         half_start = datetime.datetime.combine(self.half_start_edit.date().toPyDate(), datetime.time())
         term_end = datetime.datetime.combine(self.term_end_edit.date().toPyDate(), datetime.time())
+        dates = tp.timetableDates(term_start=term_start, half_end=half_end, half_start=half_start, term_end=term_end)
         if not(os.path.isfile(self.xml_line_edit.text())):
             self.workLabel.setText("XML file not found")
         elif not(os.path.isdir(self.target_line_edit.text())):
             self.workLabel.setText("Target directory not found")
         else:
             self.workLabel.setText('Working...')
-            calGroup = tp.TimeTableGroup(self.xml_line_edit.text())
-            if self.calThread:
+            calGroup = tp.TimeTableGroup(self.xml_line_edit.text(), dates)
+            if not(self.first_run) and self.calThread.running:
                 pass
             else:
-                self.calThread = calendarThread(calGroup, term_start, half_end, half_start, term_end, target, parent=self)
+                self.first_run = False
+                self.calThread = calendarThread(calGroup, target, parent=self)
                 self.calThread.start()
 
 
 class calendarThread(threading.Thread):
-    def __init__(self, calendarGroup, term_start, half_end, half_start, term_end, target, parent=None):
+    def __init__(self, calendarGroup, target, parent=None):
         threading.Thread.__init__(self)
         self.calendarGroup = calendarGroup
-        self.term_start = term_start
-        self.term_end = term_end
-        self.half_end = half_end
-        self.half_start = half_start
         self.target = target
         self.parent = parent
+        self.running = True
 
     def run(self):
         try:
-            self.calendarGroup.generate_calendars(self.term_start, self.half_end, self.half_start, self.term_end, path=self.target)
+            self.calendarGroup.generate_calendars(self.target)
             self.parent.workLabel.setText('Done')
-            self = None
+            self.running = False
         except:
             self.parent.workLabel.setText('Error')
-            self = None
+            self.running = False
 
 
 if __name__ == "__main__":
