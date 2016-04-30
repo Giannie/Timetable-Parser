@@ -108,6 +108,13 @@ class timetableDates(dict):
                 offset = i
             else:
                 offset = i + 2
-            self[day_list[i]] = [term_start + timedelta(days=offset), half_start + timedelta(days=offset)]
+            self[day_list[i]] = [term_start + timedelta(days=offset)]
+            half_length = half_end - term_start
+            if math.ceil(half_length.days/7) % 2 == 1:
+                if i <= 4:
+                    offset = i + 7
+                else:
+                    offset = i - 5
+            self[day_list[i]].append(half_start + timedelta(days=offset))
         self['half_end'] = half_end + timedelta(days=1)
         self['term_end'] = term_end + timedelta(days=1)
