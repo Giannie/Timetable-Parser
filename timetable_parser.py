@@ -13,7 +13,21 @@ day_list = []
 
 for week in weeks:
     for day in days:
-        day_list.append(day + week)
+        day_list.append(week + day)
+
+day_struct = [[time(8, 30), time(8, 40)],
+              [time(8, 45), time(9, 35)],
+              [time(9, 40), time(10, 30)],
+              [time(10, 30), time(10, 50)],
+              [time(10, 50), time(11, 10)],
+              [time(11, 15), time(12, 5)],
+              [time(12, 10), time(13, 0)],
+              [time(13, 0), time(13, 25)],
+              [time(13, 25), time(14, 5)],
+              [time(14, 15), time(15, 5)],
+              [time(15, 10), time(16, 0)],
+              [time(16, 10), time(17, 0)]]
+
 
 def LessonDict(group="", room="", period=None, cat=""):
     return {"group": group, "room": room, "period": period, "type": cat}
@@ -24,19 +38,6 @@ def PeriodDict(title, start, end):
 class TimeTableClass(list):
     def __init__(self, xml_tag):
         super(TimeTableClass, self).__init__()
-
-        self.day_struct = [PeriodDict("SRG", time(8, 30), time(8, 40)),
-              PeriodDict("S1", time(8, 45), time(9, 35)),
-              PeriodDict("S2", time(9, 40), time(10, 30)),
-              PeriodDict("SB1", time(10, 30), time(10, 50)),
-              PeriodDict("SB2", time(10, 50), time(11, 10)),
-              PeriodDict("S3", time(11, 15), time(12, 5)),
-              PeriodDict("S4", time(12, 10), time(13, 0)),
-              PeriodDict("SL1", time(13, 0), time(13, 25)),
-              PeriodDict("SL2", time(13, 25), time(14, 5)),
-              PeriodDict("S5", time(14, 15), time(15, 5)),
-              PeriodDict("S6", time(15, 10), time(16, 0)),
-              PeriodDict("SED", time(16, 10), time(17, 0))]
 
         period_count = 0
 
@@ -122,13 +123,56 @@ class TimeTableGroup(dict):
         super(TimeTableGroup, self).__init__()
         tree = et.parse(xml_file)
         root = tree.getroot()
-        timetables_tag = root[0][1]
-        for xml_tag in timetables_tag:
-            timetable = TimeTableClass(xml_tag)
-            name = re.sub('Timetable[ -]*', '', xml_tag[1].text)
-            self[name] = timetable
+        timetablesData = root[0].find("TimeTables")
+        for timetable in timetablesData.findall("TimetableData"):
+            teacher_name = re.sub("Timetable  - ", "", timetable.find("ResourceName").text)
+            self[teacher_name] = []
+            row_count = 0
+            for row in timetable.findall("TableRow"):
+                print(row_count)
+                period_start, period_end = day_struct[row_count]
+                column_count = 0
+                for column in row.findall("CellData")[1:]:
+                    if len(column) > 0 and column[0].text != "Blanking Code":
+                        day = day_list[column_count]
+                        group = column[0].text
+                        room_info = column[1].text.strip("-")
+                        if len(room_info) > 0:
+                            room_info = room_info.split()
+                            subject = room_info[-1]
+                            room = room_info[0]
+                            for add_room in room_info[1:-1]:
+                                room += " " + add_room
+                        else:
+                            room = ''
+                            subject = ''
+                        self[teacher_name].append({"day": day, "start": period_start, "end": period_end, "group": group, "room": room, "subject": subject})
+                    column_count += 1
+                row_count += 1
+                if row_count > 11:
+                    break
+
+    def generate_event(self, lesson, dates):
+        event = icalendar.Event()
+
 
     def generate_calendars(self, term_start, half_end, half_start, term_end, path=''):
         for name, timetable in self.items():
             name = re.sub('[\\/:"*?<>|()]+','',name)
             timetable.write_calendar(os.path.join(path, name + '.ics'), term_start, half_end, half_start, term_end)
+
+class timetableDates(dict):
+    def __init__(self, term_start=None, half_start=None, half_end=None, term_end=None, xml_date_file=None):
+        if xml_date_file:
+            # Fill in code parsing for xml file containing term dates here
+            pass
+        elif len([v for v in locals().values() if v is None]) > 1:
+            raise TypeError('Must supply term dates or an xml file containing them')
+        for i in range(len(day_list)):
+            if i <= 4:
+                offset = i
+            else:
+                offset = i + 2
+            self[day_list[i]] = [term_start + timedelta(days=offset), half_start + timedelta(days=offset)]
+        self['half_end'] = half_end + timedelta(days=1)
+        self['term_end'] = term_end + timedelta(days=1)
