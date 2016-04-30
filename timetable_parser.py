@@ -151,14 +151,18 @@ class TimeTableGroup(dict):
                 row_count += 1
                 if row_count > 11:
                     break
-    
+
+    def generate_event(self, lesson, dates):
+        event = icalendar.Event()
+
+
     def generate_calendars(self, term_start, half_end, half_start, term_end, path=''):
         for name, timetable in self.items():
             name = re.sub('[\\/:"*?<>|()]+','',name)
             timetable.write_calendar(os.path.join(path, name + '.ics'), term_start, half_end, half_start, term_end)
 
 class timetableDates(dict):
-    def __init__(self, term_start=None, half_start=None, xml_date_file=None):
+    def __init__(self, term_start=None, half_start=None, half_end=None, term_end=None, xml_date_file=None):
         if xml_date_file:
             # Fill in code parsing for xml file containing term dates here
             pass
@@ -170,3 +174,5 @@ class timetableDates(dict):
             else:
                 offset = i + 2
             self[day_list[i]] = [term_start + timedelta(days=offset), half_start + timedelta(days=offset)]
+        self['half_end'] = half_end + timedelta(days=1)
+        self['term_end'] = term_end + timedelta(days=1)
