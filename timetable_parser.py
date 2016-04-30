@@ -47,13 +47,17 @@ class TimeTableGroup(dict):
                     if len(column) > 0 and column[0].text != "Blanking Code":
                         day = day_list[column_count]
                         group = column[0].text
-                        room_info = column[1].text.strip("-")
-                        if len(room_info) > 0:
-                            room_info = room_info.split()
-                            subject = room_info[-1]
-                            room = room_info[0]
-                            for add_room in room_info[1:-1]:
-                                room += " " + add_room
+                        if column[1].text is not None:
+                            room_info = column[1].text.strip("-")
+                            if len(room_info) > 0:
+                                room_info = room_info.split()
+                                subject = room_info[-1]
+                                room = room_info[0]
+                                for add_room in room_info[1:-1]:
+                                    room += " " + add_room
+                            else:
+                                room = ''
+                                subject = ''
                         else:
                             room = ''
                             subject = ''
