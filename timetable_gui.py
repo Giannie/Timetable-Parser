@@ -7,6 +7,9 @@ import threading
 import os
 import configparser
 
+with open("style.qss", 'r') as f:
+    style = f.read()
+
 class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
     def __init__(self, parent=None):
         super(TimetableApp, self).__init__(parent)
@@ -99,6 +102,7 @@ class calendarThread(threading.Thread):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
+    app.setStyleSheet(style)
     form = TimetableApp()
     form.show()
     app.exec_()
