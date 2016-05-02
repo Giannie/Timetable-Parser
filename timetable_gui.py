@@ -6,7 +6,6 @@ import datetime
 import threading
 import os
 import configparser
-import qdarkstyle
 
 with open("style.qss", 'r') as f:
     style = f.read()
