@@ -21,8 +21,12 @@ class TimetableApp(QtWidgets.QMainWindow, qt5_layout.Ui_MainWindow):
             date_edit.setDate(QtCore.QDate.currentDate())
             date_edit.calendarWidget().setFirstDayOfWeek(1)
             date_edit.dateChanged.connect(self.lambdaGen(index))
-            date_edit.calendarWidget().children()[3].children()[0].setIcon(QtGui.QIcon('icons/left-arrow.png'))
-            date_edit.calendarWidget().children()[3].children()[1].setIcon(QtGui.QIcon('icons/right-arrow.png'))
+            cal = QStyledCalendar()
+            cal.setDayColor(6, "gray")
+            cal.setDayColor(7, "gray")
+            cal.setDirectionIcons("icons/left-arrow.png", "icons/right-arrow.png")
+            cal.setVerticalHeaderFormat(QtWidgets.QCalendarWidget.NoVerticalHeader)
+            date_edit.setCalendarWidget(cal)
             if index > 0:
                 date_edit.setMinimumDate(QtCore.QDate.currentDate())
 
@@ -102,6 +106,26 @@ class calendarThread(threading.Thread):
             self.parent.workLabel.setText('Error')
             self.running = False
 
+class QStyledCalendar(QtWidgets.QCalendarWidget):
+    def __init__(self, parent=None):
+        super(QStyledCalendar, self).__init__(parent)
+
+    def setDayColor(self, day, color):
+        if type(color) != QtGui.QColor:
+            color = QtGui.QColor(color)
+        form = self.weekdayTextFormat(day)
+        form.setForeground(color)
+        self.setWeekdayTextFormat(day, form)
+
+    def setDirectionIcons(self, left_icon, right_icon):
+        left_button = self.children()[3].children()[0]
+        right_button = self.children()[3].children()[1]
+        if type(left_icon) != QtGui.QIcon:
+            left_icon = QtGui.QIcon(left_icon)
+        if type(right_icon) != QtGui.QIcon:
+            right_icon = QtGui.QIcon(right_icon)
+        left_button.setIcon(left_icon)
+        right_button.setIcon(right_icon)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
