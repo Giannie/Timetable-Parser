@@ -6,6 +6,7 @@ import datetime
 import threading
 import os
 import configparser
+import qdarkstyle
 
 with open("style.qss", 'r') as f:
     style = f.read()
@@ -20,6 +21,8 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
             date_edit.setDate(QtCore.QDate.currentDate())
             date_edit.calendarWidget().setFirstDayOfWeek(1)
             date_edit.dateChanged.connect(self.lambdaGen(index))
+            date_edit.calendarWidget().children()[3].children()[0].setIcon(QtGui.QIcon('icons/left-arrow.png'))
+            date_edit.calendarWidget().children()[3].children()[1].setIcon(QtGui.QIcon('icons/right-arrow.png'))
             if index > 0:
                 date_edit.setMinimumDate(QtCore.QDate.currentDate())
 
