@@ -7,7 +7,14 @@ import threading
 import os
 import configparser
 
-with open("style.qss", 'r') as f:
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath('.')
+    return os.path.join(base_path, relative_path)
+
+with open(resource_path("style.qss"), 'r') as f:
     style = f.read()
 
 class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
@@ -25,7 +32,7 @@ class TimetableApp(QtGui.QMainWindow, qt_layout.Ui_MainWindow):
             cal.setFirstDayOfWeek(1)
             cal.setDayColor(6, "gray")
             cal.setDayColor(7, "gray")
-            cal.setDirectionIcons("icons/left-arrow.png", "icons/right-arrow.png")
+            cal.setDirectionIcons(resource_path("icons/left-arrow.png"), resource_path("icons/right-arrow.png"))
             cal.setVerticalHeaderFormat(QtGui.QCalendarWidget.NoVerticalHeader)
             date_edit.setCalendarWidget(cal)
             if index > 0:
