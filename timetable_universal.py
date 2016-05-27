@@ -82,22 +82,24 @@ class TimetableApp(QtWidgets.QMainWindow, qt_layout.Ui_MainWindow):
 
     def generateCalendars(self):
         target = self.target_line_edit.text()
+        xml_file = self.xml_line_edit.text()
         term_start = datetime.datetime.combine(self.term_start_edit.date().toPyDate(), datetime.time())
         half_end = datetime.datetime.combine(self.half_end_edit.date().toPyDate(), datetime.time())
         half_start = datetime.datetime.combine(self.half_start_edit.date().toPyDate(), datetime.time())
         term_end = datetime.datetime.combine(self.term_end_edit.date().toPyDate(), datetime.time())
-        if not(os.path.isfile(target)):
+        print(xml_file)
+        if not(os.path.isfile(xml_file)):
             self.workLabel.setText("XML file not found")
         elif not(os.path.isdir(target)):
             self.workLabel.setText("Target directory not found")
         else:
             self.workLabel.setText('Working...')
-            if qt_layout.week_b.isChecked():
+            if self.week_b.isChecked():
                 week_start = "B"
             else:
                 week_start = "A"
             dates = tp.timetableDates(term_start=term_start, half_end=half_end, half_start=half_start, term_end=term_end, week_start=week_start)
-            calGroup = tp.TimeTableGroup(self.xml_line_edit.text(), dates)
+            calGroup = tp.TimeTableGroup(xml_file, dates)
             if not(self.first_run) and self.calThread.running:
                 pass
             else:

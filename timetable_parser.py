@@ -105,19 +105,21 @@ class timetableDates(dict):
         if len([v for v in locals().values() if v is None]) > 1:
             raise TypeError('Must supply term dates or an xml file containing them')
         if week_start == "B":
-            day_list = day_list[5:] + day_list[:5]
-        for i in range(len(day_list)):
+            day_list_loc = day_list[5:] + day_list[:5]
+        else:
+            day_list_loc = day_list
+        for i in range(len(day_list_loc)):
             if i <= 4:
                 offset = i
             else:
                 offset = i + 2
-            self[day_list[i]] = [term_start + timedelta(days=offset)]
+            self[day_list_loc[i]] = [term_start + timedelta(days=offset)]
             half_length = half_end - term_start
             if math.ceil(half_length.days/7) % 2 == 1:
                 if i <= 4:
                     offset = i + 7
                 else:
                     offset = i - 5
-            self[day_list[i]].append(half_start + timedelta(days=offset))
+            self[day_list_loc[i]].append(half_start + timedelta(days=offset))
         self['half_end'] = half_end + timedelta(days=1)
         self['term_end'] = term_end + timedelta(days=1)
