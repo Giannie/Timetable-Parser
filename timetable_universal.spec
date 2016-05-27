@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['timetable_universal.py'],
-             pathex=['/Volumes/Home Drive/Users/giancarlo/Git/Timetable-Parser'],
+             pathex=[''],
              binaries=None,
              datas=None,
              hiddenimports=[],
