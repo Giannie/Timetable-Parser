@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-a = Analysis(['timetable_gui.py'],
-             pathex=['C:\\Users\\grassog\\Downloads\\Timetable-Parser-master'],
+a = Analysis(['timetable_universal.py'],
+             pathex=['/Volumes/Home Drive/Users/giancarlo/Git/Timetable-Parser'],
              binaries=None,
              datas=None,
              hiddenimports=[],
@@ -26,8 +26,12 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='timetable_gui',
+          name='timetable_universal',
           debug=False,
           strip=False,
           upx=True,
           console=False )
+app = BUNDLE(exe,
+             name='timetable_universal.app',
+             icon=None,
+             bundle_identifier=None)

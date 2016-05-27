@@ -101,9 +101,11 @@ class TimeTableGroup(dict):
                 f.write(cal.to_ical())
 
 class timetableDates(dict):
-    def __init__(self, term_start=None, half_start=None, half_end=None, term_end=None):
+    def __init__(self, term_start=None, half_start=None, half_end=None, term_end=None, week_start="A"):
         if len([v for v in locals().values() if v is None]) > 1:
             raise TypeError('Must supply term dates or an xml file containing them')
+        if week_start == "B":
+            day_list = day_list[5:] + day_list[:5]
         for i in range(len(day_list)):
             if i <= 4:
                 offset = i

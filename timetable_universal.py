@@ -1,17 +1,29 @@
-from PyQt5 import QtGui, QtCore, QtWidgets
-import qt5_layout
 import timetable_parser as tp
 import sys
 import datetime
 import threading
 import os
 import configparser
-import qdarkstyle
 
-with open("style.qss", 'r') as f:
+# from PyQt5 import QtGui, QtCore, QtWidgets
+# import qt5_layout as qt_layout
+
+from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui as QtWidgets
+import qt_layout
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath('.')
+    return os.path.join(base_path, relative_path)
+
+with open(resource_path("style.qss"), 'r') as f:
     style = f.read()
 
-class TimetableApp(QtWidgets.QMainWindow, qt5_layout.Ui_MainWindow):
+
+class TimetableApp(QtWidgets.QMainWindow, qt_layout.Ui_MainWindow):
     def __init__(self, parent=None):
         super(TimetableApp, self).__init__(parent)
         self.setupUi(self)
@@ -22,9 +34,11 @@ class TimetableApp(QtWidgets.QMainWindow, qt5_layout.Ui_MainWindow):
             date_edit.calendarWidget().setFirstDayOfWeek(1)
             date_edit.dateChanged.connect(self.lambdaGen(index))
             cal = QStyledCalendar()
+            cal.setMinimumHeight(200)
+            cal.setFirstDayOfWeek(1)
             cal.setDayColor(6, "gray")
             cal.setDayColor(7, "gray")
-            cal.setDirectionIcons("icons/left-arrow.png", "icons/right-arrow.png")
+            cal.setDirectionIcons(resource_path("icons/left-arrow.png"), resource_path("icons/right-arrow.png"))
             cal.setVerticalHeaderFormat(QtWidgets.QCalendarWidget.NoVerticalHeader)
             date_edit.setCalendarWidget(cal)
             if index > 0:
@@ -45,27 +59,26 @@ class TimetableApp(QtWidgets.QMainWindow, qt5_layout.Ui_MainWindow):
         return lambda: self.updateDates(i)
 
     def selectXMLFile(self):
-        self.xml_line_edit.setText(QtGui.QFileDialog.getOpenFileName())
+        self.xml_line_edit.setText(QtWidgets.QFileDialog.getOpenFileName())
 
     def selectTarget(self):
-        self.target_line_edit.setText(QtGui.QFileDialog.getExistingDirectory())
+        self.target_line_edit.setText(QtWidgets.QFileDialog.getExistingDirectory())
 
     def selectDateFile(self):
-        self.selectDates(QtGui.QFileDialog.getOpenFileName())
+        self.selectDates(QtWidgets.QFileDialog.getOpenFileName())
 
     def selectDates(self, filename):
-        if filename:
+        if filename and filename[0]:
             config = configparser.ConfigParser()
             config.read(filename)
             choices = config.sections()
-            term, ok = QtGui.QInputDialog.getItem(self, "Select Term", "Select term: ", choices, 0, False)
+            term, ok = QtWidgets.QInputDialog.getItem(self, "Select Term", "Select term: ", choices, 0, False)
             if ok:
                 term_choice = config[term]
                 self.term_start_edit.setDate(QtCore.QDate.fromString(term_choice["term_start"], "dd'/'MM'/'yyyy"))
                 self.half_end_edit.setDate(QtCore.QDate.fromString(term_choice["half_end"], "dd'/'MM'/'yyyy"))
                 self.half_start_edit.setDate(QtCore.QDate.fromString(term_choice["half_start"], "dd'/'MM'/'yyyy"))
                 self.term_end_edit.setDate(QtCore.QDate.fromString(term_choice["term_end"], "dd'/'MM'/'yyyy"))
-
 
     def generateCalendars(self):
         target = self.target_line_edit.text()
@@ -79,7 +92,11 @@ class TimetableApp(QtWidgets.QMainWindow, qt5_layout.Ui_MainWindow):
             self.workLabel.setText("Target directory not found")
         else:
             self.workLabel.setText('Working...')
-            dates = tp.timetableDates(term_start=term_start, half_end=half_end, half_start=half_start, term_end=term_end)
+            if qt_layout.week_b.isChecked():
+                week_start = "B"
+            else:
+                week_start = "A"
+            dates = tp.timetableDates(term_start=term_start, half_end=half_end, half_start=half_start, term_end=term_end, week_start=week_start)
             calGroup = tp.TimeTableGroup(self.xml_line_edit.text(), dates)
             if not(self.first_run) and self.calThread.running:
                 pass
