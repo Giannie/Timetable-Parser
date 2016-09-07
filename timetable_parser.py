@@ -44,7 +44,7 @@ class TimeTableGroup(dict):
                 period_start, period_end = day_struct[row_count]
                 column_count = 0
                 for column in row.findall("CellData")[1:]:
-                    if len(column) > 0 and column[0].text != "Blanking Code":
+                    if len(column) > 0 and column[0].text != "Blanking Code" and column[0].text is not None:
                         day = day_list[column_count]
                         group = column[0].text
                         if column[1].text is not None:
